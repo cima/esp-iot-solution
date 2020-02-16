@@ -31,7 +31,7 @@ extern "C"
 
 #define INTERFACE_IIC               //I2C
 
-#define SSD1306_SET_LOWER_ADDRESS   0x02
+#define SSD1306_SET_LOWER_ADDRESS   0x00
 #define SSD1306_SET_HIGHER_ADDRESS  0x10
 
 #define SSD1306_CMD                 0
@@ -46,17 +46,17 @@ extern "C"
 #define SSD1306_CS_NUM              23
 #define SSD1306_CS_FUNC             FUNC_GPIO23_GPIO23
 
-#define SSD1306_CLK_MUX             PERIPHS_IO_MUX_GPIO4_U
-#define SSD1306_CLK_NUM             4
-#define SSD1306_CLK_FUNC            FUNC_GPIO4_GPIO4
+#define SSD1306_CLK_MUX             PERIPHS_IO_MUX_MTDO_U
+#define SSD1306_CLK_NUM             15
+#define SSD1306_CLK_FUNC            FUNC_MTDO_GPIO15
 
-#define SSD1306_DIN_MUX             PERIPHS_IO_MUX_GPIO17_U
-#define SSD1306_DIN_NUM             17
-#define SSD1306_DIN_FUNC            FUNC_GPIO17_GPIO17
+#define SSD1306_DIN_MUX             PERIPHS_IO_MUX_GPIO4_U
+#define SSD1306_DIN_NUM             4
+#define SSD1306_DIN_FUNC            FUNC_GPIO4_GPIO4
 
-#define SSD1306_RES_MUX             PERIPHS_IO_MUX_GPIO18_U
-#define SSD1306_RES_NUM             18
-#define SSD1306_RES_FUNC            FUNC_GPIO18_GPIO18
+#define SSD1306_RES_MUX             PERIPHS_IO_MUX_GPIO16_U
+#define SSD1306_RES_NUM             16
+#define SSD1306_RES_FUNC            FUNC_GPIO16_GPIO16
 
 #define SSD1306_DC_MUX              PERIPHS_IO_MUX_GPIO5_U
 #define SSD1306_DC_NUM              5
@@ -78,8 +78,8 @@ extern "C"
 #define __SSD1306_DIN_CLR()         GPIO_OUTPUT_SET(SSD1306_DIN_NUM, 0)
 
 //I2C
-#define OLED_IIC_SCL_NUM            (gpio_num_t)4       /*!< gpio number for I2C master clock IO4*/
-#define OLED_IIC_SDA_NUM            (gpio_num_t)17      /*!< gpio number for I2C master data IO17*/
+#define OLED_IIC_SCL_NUM            (gpio_num_t)51       /*!< gpio number for I2C master clock IO4*/
+#define OLED_IIC_SDA_NUM            (gpio_num_t)4      /*!< gpio number for I2C master data IO17*/
 #define OLED_IIC_NUM                I2C_NUM_0           /*!< I2C number >*/
 #define OLED_IIC_FREQ_HZ            100000              /*!< I2C colock frequency >*/
 #define OLED_IIC_TX_BUF_DISABLE     0                   /*!< I2C Tx buffer disable >*/
