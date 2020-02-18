@@ -23,6 +23,12 @@ CSsd1306::CSsd1306(CI2CBus *p_i2c_bus, uint8_t addr)
     m_dev_handle = iot_ssd1306_create(bus->get_bus_handle(), addr);
 }
 
+CSsd1306::CSsd1306(CI2CBus *p_i2c_bus, ssd1306_config_t config, uint8_t addr)
+{
+    bus = p_i2c_bus;
+    m_dev_handle = iot_ssd1306_custom_create(bus->get_bus_handle(), addr, config);
+}
+
 CSsd1306::~CSsd1306()
 {
     iot_ssd1306_delete(m_dev_handle, false);

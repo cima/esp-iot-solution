@@ -95,6 +95,56 @@ extern "C"
 typedef void* ssd1306_handle_t;                         /*handle of ssd1306*/
 
 /**
+ * @brief   Structure for customized device initialization
+ * 
+ * GPIO multiplexer, Function and GPIO pin number to be specified.
+ */
+typedef struct ssd1306_config {
+
+        // CS
+        int chipSelectMultiplexer;
+        int chipSelectFunction;
+        int chipSelectNumber;
+
+        // RES
+        int resetMultiplexer;
+        int resetFunction;
+        int resetNumber;
+
+        // DC
+        int dataCommandMultiplexer;
+        int dataCommandFunction;
+        int dataCommandNumber;
+
+        // DIN
+        int dataInputMultiplexer;
+        int dataInputFunction;
+        int dataInputNumber;
+
+        // CLK
+        int clockMultiplexer;
+        int clockFunction;
+        int clockNumber;
+
+        // Flavor
+        int lowerAddress;
+        int higherAddress;
+
+} ssd1306_config_t;
+
+/**
+ * @brief   device initialization
+ *
+ * @param   dev object handle of ssd1306
+ * @param   config a pin and functions references for actual device wiring
+ *
+ * @return
+ *     - ESP_OK Success
+ *     - ESP_FAIL Fail
+ */
+esp_err_t iot_ssd1306_custom_init(ssd1306_handle_t dev, ssd1306_config_t config);
+
+/**
  * @brief   device initialization
  *
  * @param   dev object handle of ssd1306
@@ -104,6 +154,18 @@ typedef void* ssd1306_handle_t;                         /*handle of ssd1306*/
  *     - ESP_FAIL Fail
  */
 esp_err_t iot_ssd1306_init(ssd1306_handle_t dev);
+
+/**
+ * @brief   Create and initialization device object and return a device handle
+ *
+ * @param   bus I2C bus object handle
+ * @param   dev_addr I2C device address of device
+ * @param   config a pin and functions references for actual device wiring
+ *
+ * @return
+ *     - device object handle of ssd1306
+ */
+ssd1306_handle_t iot_ssd1306_custom_create(i2c_bus_handle_t bus, uint16_t dev_addr, ssd1306_config_t config);
 
 /**
  * @brief   Create and initialization device object and return a device handle
@@ -329,6 +391,15 @@ public:
      * @param   addr sensor device address
      */
     CSsd1306(CI2CBus *p_i2c_bus, uint8_t addr = SSD1306_I2C_ADDRESS);
+
+    /**
+     * @brief   Constructor of CSsd1306 class
+     *
+     * @param   p_i2c_bus pointer to CI2CBus object
+     * @param   config a pin and functions references for actual device wiring
+     * @param   addr sensor device address
+     */
+    CSsd1306(CI2CBus *p_i2c_bus, ssd1306_config_t config, uint8_t addr = SSD1306_I2C_ADDRESS);
 
     /**
      * @brief   Destructor function of CSsd1306 class

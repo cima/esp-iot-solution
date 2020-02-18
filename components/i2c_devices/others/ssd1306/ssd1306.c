@@ -17,10 +17,25 @@
 #include <time.h>
 #include <sys/time.h>
 
+/**
+ * @brief Wiring for <TODO> dev board and for SH1106 flavored display.
+ * 
+*/
+ssd1306_config_t __SSD1306_DEFAULT_GPIO_CONFIG = {
+        SSD1306_CS_MUX,  SSD1306_CS_FUNC,  SSD1306_CS_NUM,
+        SSD1306_RES_MUX, SSD1306_RES_FUNC, SSD1306_RES_NUM,
+        SSD1306_DC_MUX,  SSD1306_DC_FUNC,  SSD1306_DC_NUM,
+        SSD1306_DIN_MUX, SSD1306_DIN_FUNC, SSD1306_DIN_NUM,
+        SSD1306_CLK_MUX, SSD1306_CLK_FUNC, SSD1306_CLK_NUM,
+        SSD1306_SET_LOWER_ADDRESS,
+        SSD1306_SET_HIGHER_ADDRESS
+};
+
 typedef struct {
     i2c_bus_handle_t bus;
     uint16_t dev_addr;
     uint8_t s_chDisplayBuffer[128][8];
+    ssd1306_config_t config;
 } ssd1306_dev_t;
 
 static uint32_t _pow(uint8_t m, uint8_t n)
@@ -34,8 +49,9 @@ static uint32_t _pow(uint8_t m, uint8_t n)
 
 void iot_set_column_address(ssd1306_handle_t dev)
 {
-    iot_ssd1306_write_byte(dev, SSD1306_SET_LOWER_ADDRESS, SSD1306_CMD);
-    iot_ssd1306_write_byte(dev, SSD1306_SET_HIGHER_ADDRESS, SSD1306_CMD);
+    ssd1306_dev_t* device = (ssd1306_dev_t*) dev;
+    iot_ssd1306_write_byte(dev, device->config.lowerAddress, SSD1306_CMD);
+    iot_ssd1306_write_byte(dev, device->config.higherAddress, SSD1306_CMD);
 }
 
 esp_err_t iot_ssd1306_write_byte(ssd1306_handle_t dev, uint8_t chData,
@@ -242,19 +258,20 @@ void iot_ssd1306_draw_bitmap(ssd1306_handle_t dev, uint8_t chXpos, uint8_t chYpo
     }
 }
 
-esp_err_t iot_ssd1306_init(ssd1306_handle_t dev)
+esp_err_t iot_ssd1306_custom_init(ssd1306_handle_t dev, ssd1306_config_t config)
 {
     esp_err_t ret;
-    PIN_FUNC_SELECT(SSD1306_CS_MUX, SSD1306_CS_FUNC);
-    PIN_FUNC_SELECT(SSD1306_RES_MUX, SSD1306_RES_FUNC);
-    PIN_FUNC_SELECT(SSD1306_DC_MUX, SSD1306_DC_FUNC);
-    PIN_FUNC_SELECT(SSD1306_DIN_MUX, SSD1306_DIN_FUNC);
-    PIN_FUNC_SELECT(SSD1306_CLK_MUX, SSD1306_CLK_FUNC);
+
+    PIN_FUNC_SELECT(config.chipSelectMultiplexer,  config.chipSelectFunction);
+    PIN_FUNC_SELECT(config.resetMultiplexer,       config.resetFunction);
+    PIN_FUNC_SELECT(config.dataCommandMultiplexer, config.dataCommandFunction);
+    PIN_FUNC_SELECT(config.dataInputMultiplexer,   config.dataInputFunction);
+    PIN_FUNC_SELECT(config.clockMultiplexer,       config.clockFunction);
 
 #ifdef	INTERFACE_IIC
-    __SSD1306_CS_CLR(); //CS reset
-    __SSD1306_DC_CLR(); //D/C reset
-    __SSD1306_RES_SET();//RES set
+    GPIO_OUTPUT_SET(config.chipSelectNumber, 0); //CS reset
+    GPIO_OUTPUT_SET(config.dataCommandNumber, 0); //D/C reset
+    GPIO_OUTPUT_SET(config.resetNumber, 1); //RES set
 #endif
 
     iot_ssd1306_write_byte(dev, 0xAE, SSD1306_CMD); //--turn off oled panel
@@ -290,13 +307,24 @@ esp_err_t iot_ssd1306_init(ssd1306_handle_t dev)
     return ret;
 }
 
-ssd1306_handle_t iot_ssd1306_create(i2c_bus_handle_t bus, uint16_t dev_addr)
+esp_err_t iot_ssd1306_init(ssd1306_handle_t dev)
+{
+    return iot_ssd1306_custom_init(dev, __SSD1306_DEFAULT_GPIO_CONFIG);
+}
+
+ssd1306_handle_t iot_ssd1306_custom_create(i2c_bus_handle_t bus, uint16_t dev_addr, ssd1306_config_t config)
 {
     ssd1306_dev_t* dev = (ssd1306_dev_t*) calloc(1, sizeof(ssd1306_dev_t));
     dev->bus = bus;
     dev->dev_addr = dev_addr;
-    iot_ssd1306_init((ssd1306_handle_t) dev);
+    dev->config = config;
+    iot_ssd1306_custom_init((ssd1306_handle_t) dev, config);
     return (ssd1306_handle_t) dev;
+}
+
+ssd1306_handle_t iot_ssd1306_create(i2c_bus_handle_t bus, uint16_t dev_addr)
+{
+    return iot_ssd1306_custom_create(bus, dev_addr, __SSD1306_DEFAULT_GPIO_CONFIG);
 }
 
 esp_err_t iot_ssd1306_delete(ssd1306_handle_t dev, bool del_bus)
